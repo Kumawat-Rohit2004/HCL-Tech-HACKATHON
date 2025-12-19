@@ -1,6 +1,6 @@
 # HCL-Tech-HACKATHON
 
-
+```text
 Retail DB (tree representation)
 └─ ENTITIES
    ├─ STORES
@@ -24,7 +24,7 @@ Retail DB (tree representation)
    │  ├─ loyalty_status (VARCHAR)
    │  ├─ total_loyalty_points (INT)
    │  ├─ last_purchase_date (DATE)
-   │  └─ segment_id (VARCHAR)   # derived by segmentation logic
+   │  └─ segment_id (VARCHAR)
    │
    ├─ PROMOTION_DETAILS
    │  ├─ promotion_id (PK, INT)
@@ -42,44 +42,35 @@ Retail DB (tree representation)
    │  └─ bonus_points (INT)
    │
    ├─ STORE_SALES_HEADER
-   │  ├─ transaction_id (PK, VARCHAR)   # unique transaction id
-   │  ├─ customer_id (FK -> CUSTOMER_DETAILS.customer_id, INT)
-   │  ├─ store_id (FK -> STORES.store_id, INT)
+   │  ├─ transaction_id (PK, VARCHAR)
+   │  ├─ customer_id (FK -> CUSTOMER_DETAILS.customer_id)
+   │  ├─ store_id (FK -> STORES.store_id)
    │  ├─ transaction_date (DATETIME)
-   │  └─ total_amount (DECIMAL)         # validate == sum of line items
+   │  └─ total_amount (DECIMAL)
    │
    └─ STORE_SALES_LINE_ITEMS
       ├─ line_item_id (PK, INT)
-      ├─ transaction_id (FK -> STORE_SALES_HEADER.transaction_id, VARCHAR)
-      ├─ product_id (FK -> PRODUCTS.product_id, INT)
-      ├─ promotion_id (FK -> PROMOTION_DETAILS.promotion_id, INT)  # nullable
+      ├─ transaction_id (FK -> STORE_SALES_HEADER.transaction_id)
+      ├─ product_id (FK -> PRODUCTS.product_id)
+      ├─ promotion_id (FK -> PROMOTION_DETAILS.promotion_id)
       ├─ quantity (INT)
       └─ line_item_amount (DECIMAL)
 
-RELATIONSHIPS (cardinality)
+RELATIONSHIPS
 └─
    ├─ STORES 1 ──< * STORE_SALES_HEADER
-   │   (one store has many transactions)
-   │
    ├─ CUSTOMER_DETAILS 1 ──< * STORE_SALES_HEADER
-   │   (one customer can make many transactions)
-   │
    ├─ STORE_SALES_HEADER 1 ──< * STORE_SALES_LINE_ITEMS
-   │   (one transaction contains many line items)
-   │
    ├─ PRODUCTS 1 ──< * STORE_SALES_LINE_ITEMS
-   │   (one product appears in many line items)
-   │
    ├─ PROMOTION_DETAILS 1 ──< * STORE_SALES_LINE_ITEMS
-   │   (one promotion can be applied to many line items)
-   │
-   └─ LOYALTY_RULES  (business logic) -> used to calculate/award points for CUSTOMER_DETAILS
+   └─ LOYALTY_RULES → CUSTOMER_DETAILS (business logic)
 
 NOTES
 └─
-   ├─ Use STORE_SALES_HEADER.total_amount to validate data quality against sum(line_item_amount).
-   ├─ promotion_id in line items may be NULL (item not promoted).
-   ├─ segment_id in CUSTOMER_DETAILS is not a FK to a table in the PDF; it is derived via RFM/segmentation logic.
-   └─ Keep raw/staging/quarantine layers in your pipeline (not shown as tables here) for ETL & QA.
+   ├─ Header total_amount must equal sum of line_item_amount.
+   ├─ promotion_id can be NULL if no promotion applied.
+   └─ segment_id is derived (RFM), not a foreign key.
+```
+
 
 
